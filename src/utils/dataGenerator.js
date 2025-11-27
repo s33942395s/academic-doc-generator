@@ -22,7 +22,7 @@ export const generateRandomData = () => {
   const lastName = faker.person.lastName();
 
   // Common Texas/US universities to choose from if desired, or just generic
-  const university = "Hajimi University"; 
+  const university = "Hachimi University"; 
 
   // Course Data Pool based on Major
   const majors = [
@@ -160,10 +160,25 @@ export const generateRandomData = () => {
   const totalFees = Object.values(fees).reduce((a, b) => a + b, 0) + diffTuition;
   const totalCharges = baseTuition + totalFees;
 
-  const admissionDate = faker.date.past({ years: 1 });
+  // Admission date: 1-3 years ago (ensures student card remains valid)
+  const yearsEnrolled = faker.number.int({ min: 1, max: 3 });
+  const admissionDate = new Date();
+  admissionDate.setFullYear(admissionDate.getFullYear() - yearsEnrolled);
+  // Randomize to a semester start (Aug/Sep or Jan/Feb)
+  admissionDate.setMonth(faker.helpers.arrayElement([0, 1, 7, 8]));
+  admissionDate.setDate(faker.number.int({ min: 15, max: 28 }));
+
+  // Student Card issued 1-4 weeks after admission
+  const cardIssueDate = new Date(admissionDate);
+  cardIssueDate.setDate(cardIssueDate.getDate() + faker.number.int({ min: 7, max: 28 }));
+  
+  // Valid for 4 years from issue
+  const cardValidDate = new Date(cardIssueDate);
+  cardValidDate.setFullYear(cardValidDate.getFullYear() + 4);
 
   return {
     universityName: university,
+    universityLogo: '/university-logo.png',
     universityAddress: `${faker.number.int({min: 100, max: 9999})} University Blvd, ${faker.location.city()}, ${faker.location.state({ abbreviated: true })}, ${faker.location.zipCode()}`,
     studentName: `${lastName} ${firstName}`, 
     studentID: `${faker.string.numeric(6)}-${faker.string.numeric(4)}`,
@@ -200,6 +215,13 @@ export const generateRandomData = () => {
             qualityPoints: cumPoints.toFixed(2),
             gpa: cumGpa
         }
-    }
+    },
+    // Student Card specific
+    cardSubtitle: 'INTERNATIONAL STUDENT ID CARD',
+    cardIssueDate: formatDate(cardIssueDate),
+    cardValidDate: formatDate(cardValidDate),
+    cardNotice: 'This card is the property of the university and must be returned upon request. If found, please return to the nearest university office.',
+    cardColor: faker.helpers.arrayElement(['#3b82f6', '#10b981', '#8b5cf6', '#ef4444', '#f59e0b', '#06b6d4', '#ec4899']),
+    studentPhoto: null
   };
 };

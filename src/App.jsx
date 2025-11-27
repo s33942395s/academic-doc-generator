@@ -11,13 +11,15 @@ import TranscriptTemplate from './components/TranscriptTemplate';
 import ScheduleTemplate from './components/ScheduleTemplate';
 import AdmissionLetterTemplate from './components/AdmissionLetterTemplate';
 import EnrollmentCertificateTemplate from './components/EnrollmentCertificateTemplate';
+import StudentCardFrontTemplate from './components/StudentCardFrontTemplate';
+import StudentCardBackTemplate from './components/StudentCardBackTemplate';
 
 const App = () => {
   const [formData, setFormData] = useState(generateRandomData());
 
   const [exportMode, setExportMode] = useState("stitched-horizontal"); 
   const [isGenerating, setIsGenerating] = useState(false);
-  const [scale, setScale] = useState(0.45); 
+  const [scale, setScale] = useState(0.55); 
   const [activeCanvas, setActiveCanvas] = useState("main"); // "main" or "extra"
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
@@ -46,10 +48,22 @@ const App = () => {
     }
   };
 
+  const handlePhotoUpload = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            setFormData(prev => ({ ...prev, studentPhoto: event.target.result }));
+        };
+        reader.readAsDataURL(file);
+    }
+  };
+
   const regenerateData = () => {
     setFormData(prev => ({
         ...generateRandomData(),
-        universityLogo: prev.universityLogo // Preserve uploaded logo on regenerate
+        universityLogo: prev.universityLogo,
+        studentPhoto: prev.studentPhoto
     }));
   };
 
@@ -172,6 +186,10 @@ const App = () => {
   const hiddenScheduleRef = useRef(null);
   const hiddenAdmissionRef = useRef(null);
   const hiddenEnrollmentRef = useRef(null);
+  const hiddenCardFrontRef = useRef(null);
+  const hiddenCardBackRef = useRef(null);
+  const cardFrontRef = useRef(null);
+  const cardBackRef = useRef(null);
 
   const exportSingle = async (ref, filename) => {
     if (!ref.current) return;
@@ -329,6 +347,45 @@ const App = () => {
                     Download Enrollment Cert
                 </Button>
             </div>
+
+            <Divider className="my-4" />
+            <h3 className="text-xl font-semibold mb-2">Student ID Card</h3>
+            <div className="mb-4">
+                <label className="block text-sm font-medium text-foreground mb-2">Student Photo</label>
+                <input 
+                    type="file" 
+                    accept="image/*"
+                    onChange={handlePhotoUpload}
+                    className="block w-full text-sm text-slate-500
+                      file:mr-4 file:py-2 file:px-4
+                      file:rounded-full file:border-0
+                      file:text-sm file:font-semibold
+                      file:bg-violet-50 file:text-violet-700
+                      hover:file:bg-violet-100
+                      cursor-pointer
+                    "
+                />
+            </div>
+            <div className="flex flex-col gap-3">
+                <Button 
+                    color="default" 
+                    variant="flat" 
+                    className="w-full" 
+                    onClick={() => exportSingle(hiddenCardFrontRef, "Student_ID_Front.png")}
+                    isLoading={isGenerating}
+                >
+                    Download ID Front
+                </Button>
+                <Button 
+                    color="default" 
+                    variant="flat" 
+                    className="w-full" 
+                    onClick={() => exportSingle(hiddenCardBackRef, "Student_ID_Back.png")}
+                    isLoading={isGenerating}
+                >
+                    Download ID Back
+                </Button>
+            </div>
           </div>
         </ScrollShadow>
       </div>
@@ -353,6 +410,14 @@ const App = () => {
           </div>
           <div style={{ backgroundColor: 'white', width: '800px', minHeight: '1000px' }}>
             <EnrollmentCertificateTemplate ref={hiddenEnrollmentRef} data={formData} />
+          </div>
+          
+          {/* Student ID Card */}
+          <div style={{ backgroundColor: 'white', width: '750px', height: '480px' }}>
+            <StudentCardFrontTemplate ref={hiddenCardFrontRef} data={formData} />
+          </div>
+          <div style={{ backgroundColor: 'white', width: '750px', height: '480px' }}>
+            <StudentCardBackTemplate ref={hiddenCardBackRef} data={formData} />
           </div>
       </div>
 
@@ -383,6 +448,7 @@ const App = () => {
             >
                 <Tab key="main" title="Standard Documents (3)" />
                 <Tab key="extra" title="Extra Documents (2)" />
+                <Tab key="card" title="Student ID Card" />
             </Tabs>
         </div>
 
@@ -417,7 +483,7 @@ const App = () => {
           style={{ transform: `translate(${panOffset.x}px, ${panOffset.y}px)` }}
         >
             <AnimatePresence mode="wait">
-                {activeCanvas === "main" ? (
+                {activeCanvas === "main" && (
                     <motion.div 
                         key="main-canvas"
                         ref={containerRef} 
@@ -464,7 +530,8 @@ const App = () => {
                             </div>
                         </motion.div>
                     </motion.div>
-                ) : (
+                )}
+                {activeCanvas === "extra" && (
                     <motion.div 
                         key="extra-canvas"
                         className="absolute flex flex-row gap-10 p-20 origin-center"
@@ -496,6 +563,42 @@ const App = () => {
                             <div className="absolute -top-8 left-0 bg-zinc-800 text-white px-3 py-1 rounded-t text-sm doc-label shadow-lg">Enrollment Cert</div>
                             <div className="shadow-2xl transition-shadow hover:shadow-blue-500/20">
                                 <EnrollmentCertificateTemplate ref={enrollmentRef} data={formData} />
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+                {activeCanvas === "card" && (
+                    <motion.div 
+                        key="card-canvas"
+                        className="absolute flex flex-row gap-10 p-20 origin-center"
+                        initial={{ opacity: 0, scale: scale * 0.9 }}
+                        animate={{ opacity: 1, scale: scale }}
+                        exit={{ opacity: 0, scale: scale * 0.9 }}
+                        transition={{ duration: 0.2 }}
+                        style={{
+                            width: 'max-content',
+                            height: 'max-content',
+                        }}
+                    >
+                        <motion.div 
+                            drag 
+                            dragMomentum={false}
+                            className="relative group document-card"
+                        >
+                            <div className="absolute -top-8 left-0 bg-zinc-800 text-white px-3 py-1 rounded-t text-sm doc-label shadow-lg">Student ID (Front)</div>
+                            <div className="shadow-2xl transition-shadow hover:shadow-blue-500/20">
+                                <StudentCardFrontTemplate ref={cardFrontRef} data={formData} />
+                            </div>
+                        </motion.div>
+
+                        <motion.div 
+                            drag 
+                            dragMomentum={false}
+                            className="relative group document-card"
+                        >
+                            <div className="absolute -top-8 left-0 bg-zinc-800 text-white px-3 py-1 rounded-t text-sm doc-label shadow-lg">Student ID (Back)</div>
+                            <div className="shadow-2xl transition-shadow hover:shadow-blue-500/20">
+                                <StudentCardBackTemplate ref={cardBackRef} data={formData} />
                             </div>
                         </motion.div>
                     </motion.div>
