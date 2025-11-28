@@ -652,7 +652,7 @@ const App = () => {
                 }}
             >
                 <Tab key="main" title={userMode === "student" ? "Standard Documents (3)" : "Core Documents (3)"} />
-                <Tab key="extra" title={userMode === "student" ? "Extra Documents (2)" : "Extra Documents (2)"} />
+                <Tab key="extra" title={userMode === "student" ? "Extra Documents (2)" : "Extra Documents"} />
                 <Tab key="card" title={userMode === "student" ? "Student ID Card" : "Faculty ID Card"} />
             </Tabs>
         </div>
@@ -813,40 +813,13 @@ const App = () => {
                                 </motion.div>
                             </>
                         ) : (
-                            <>
-                                <motion.div 
-                                    drag 
-                                    dragMomentum={false}
-                                    className="relative group document-card"
-                                >
-                                    <div className="absolute -top-8 left-0 bg-zinc-800 text-white px-3 py-1 rounded-t text-sm doc-label shadow-lg">Teaching Certificate</div>
-                                    <div className="shadow-2xl transition-shadow hover:shadow-blue-500/20">
-                                        <TeachingCertificateTemplate data={formData} />
-                                    </div>
-                                </motion.div>
-
-                                <motion.div 
-                                    drag 
-                                    dragMomentum={false}
-                                    className="relative group document-card"
-                                >
-                                    <div className="absolute -top-8 left-0 bg-zinc-800 text-white px-3 py-1 rounded-t text-sm doc-label shadow-lg">Employment Letter</div>
-                                    <div className="shadow-2xl transition-shadow hover:shadow-blue-500/20">
-                                        <EmploymentLetterTemplate data={formData} />
-                                    </div>
-                                </motion.div>
-
-                                <motion.div 
-                                    drag 
-                                    dragMomentum={false}
-                                    className="relative group document-card"
-                                >
-                                    <div className="absolute -top-8 left-0 bg-zinc-800 text-white px-3 py-1 rounded-t text-sm doc-label shadow-lg">Salary Statement</div>
-                                    <div className="shadow-2xl transition-shadow hover:shadow-blue-500/20">
-                                        <SalaryStatementTemplate data={formData} />
-                                    </div>
-                                </motion.div>
-                            </>
+                            <div className="flex items-center justify-center h-96">
+                                <div className="text-center text-foreground/60">
+                                    <div className="text-6xl mb-4">📋</div>
+                                    <div className="text-lg font-medium mb-2">Additional Teacher Documents</div>
+                                    <div className="text-sm">Coming soon: Performance reviews, schedules, etc.</div>
+                                </div>
+                            </div>
                         )}
                     </motion.div>
                 )}
