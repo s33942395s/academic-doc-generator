@@ -22,7 +22,7 @@ export const generateRandomData = () => {
   const lastName = faker.person.lastName();
 
   // Common Texas/US universities to choose from if desired, or just generic
-  const university = "Hachimi University"; 
+  const university = "National University of Tainan"; 
 
   // Course Data Pool based on Major
   const majors = [
